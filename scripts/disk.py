@@ -1,5 +1,8 @@
 #!/usr/bin/python
 
+
+# Script pessoal para a leitura de dados do meu disco nvme + btrfs(e suas opções de montagem)
+
 import psutil
 
 def linha():
