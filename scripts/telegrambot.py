@@ -3,7 +3,7 @@
 import telebot
 import requests
 
-CHAVE_API = ""
+CHAVE_API = ""  # Não se esqueça de pegar seu Token API no Telegram
 bot = telebot.TeleBot(CHAVE_API)
 
 cities_in_temp = {}
@@ -56,7 +56,7 @@ def handle_temp_city(mensagem):
     chat_id = mensagem.chat.id
     cidade = mensagem.text
     if cidade:
-        api_key = ''
+        api_key = '' # Cadastre-se no site abaixo e gere uma chave API
         url = f"https://api.openweathermap.org/data/2.5/weather?q={cidade}&appid={api_key}&units=metric"
         resposta = requests.get(url)
 
