@@ -1,21 +1,35 @@
-#!/usr/bin/python
-
 import telebot
 import requests
+import datetime
 
-CHAVE_API = ""  # Não se esqueça de pegar seu Token API no Telegram
-bot = telebot.TeleBot(CHAVE_API)
 
-cities_in_temp = {}
+CHAVE_API_TELEGRAM = ""
+CHAVE_API_TEMPO = "" 
+# Vá no site openweather.com e gere seu token para ter acesso a API do tempo
+
+bot = telebot.TeleBot(CHAVE_API_TELEGRAM)
+
+
+# Verificar a hora do dia
+def get_time_of_day():
+    now = datetime.datetime.now()
+    hour = now.hour
+
+    if 6 <= hour < 12:
+        return "Bom dia"
+    elif 12 <= hour < 18:
+        return "Boa tarde"
+    else:
+        return "Boa noite"
 
 
 @bot.message_handler(commands=["cep"])
 def busca_cep(mensagem):
     bot.send_message(mensagem.chat.id, "Digite o CEP para obter informações sobre a rua:")
-    bot.register_next_step_handler(mensagem, handle_cep)
+    bot.register_next_step_handler(mensagem, busca_cep) # < - parâmetro que pega o conteúdo da próxima mensagem que é chamada na próxima função
 
 
-def handle_cep(mensagem):
+def busca_cep(mensagem):
     cep = mensagem.text
     if cep:
         url = f"https://viacep.com.br/ws/{cep}/json/"
@@ -29,13 +43,13 @@ def handle_cep(mensagem):
                 cidade = dados_cep["localidade"]
                 uf = dados_cep["uf"]
                 mensagem_resposta = f"Rua: {rua}\nBairro: {bairro}\nCidade: {cidade}\nUF: {uf}"
-                bot.send_message(mensagem.chat.id, mensagem_resposta)
+                bot.reply_to(mensagem, mensagem_resposta)
             else:
-                bot.send_message(mensagem.chat.id, "CEP não encontrado.")
+                bot.reply_to(mensagem, "CEP não encontrado.")
         else:
-            bot.send_message(mensagem.chat.id, "Não foi possível obter as informações do CEP.")
+            bot.reply_to(mensagem, "Não foi possível obter as informações do CEP.")
     else:
-        bot.send_message(mensagem.chat.id, "Por favor, especifique o CEP.")
+        bot.send_message(mensagem.chat.id , "Por favor, especifique o CEP.")
 
 
 @bot.message_handler(commands=["seu_id"])
@@ -43,33 +57,32 @@ def iduser(mensagem):
     iduser = mensagem.chat.id
     bot.reply_to(mensagem, f"id: {iduser}")
 
+cidade_temp = {}
 
 @bot.message_handler(commands=["temp"])
 def handle_message(mensagem):
     chat_id = mensagem.chat.id
     bot.send_message(chat_id, "Digite o nome da cidade:")
-    cities_in_temp[chat_id] = True
+    cidade_temp[chat_id] = True
 
 
-@bot.message_handler(func=lambda mensagem: cities_in_temp.get(mensagem.chat.id, False))
-def handle_temp_city(mensagem):
-    chat_id = mensagem.chat.id
+@bot.message_handler(func=lambda mensagem: cidade_temp.get(mensagem.chat.id, False))
+def cidade_tempo(mensagem):
     cidade = mensagem.text
     if cidade:
-        api_key = '' # Cadastre-se no site abaixo e gere uma chave API
-        url = f"https://api.openweathermap.org/data/2.5/weather?q={cidade}&appid={api_key}&units=metric"
+        url = f"https://api.openweathermap.org/data/2.5/weather?q={cidade}&appid={CHAVE_API_TEMPO}&units=metric"
         resposta = requests.get(url)
-
+        
         if resposta.status_code == 200:
             dados_clima = resposta.json()
             temperatura = dados_clima["main"]["temp"]
-            bot.send_message(chat_id, f"A temperatura atual de {cidade} é: {temperatura}°C")
+            bot.send_message(mensagem.chat.id, f"A temperatura atual de {cidade} é: {temperatura}°C")
         else:
-            bot.send_message(chat_id, "Não foi possível obter as informações meteorológicas.")
+            bot.send_message(mensagem.chat.id, "Não foi possível obter as informações meteorológicas.")
     else:
-        bot.send_message(chat_id, "Por favor, especifique o nome da cidade corretamente.")
+        bot.send_message(mensagem.chat.id, "Por favor, especifique o nome da cidade corretamente.")
 
-    del cities_in_temp[chat_id]
+    del cidade_temp[mensagem.chat.id]
 
 
 @bot.message_handler(commands=["cotacao"])
@@ -86,7 +99,7 @@ def cotacao_dolar(mensagem):
 
 
 @bot.message_handler(commands=["megasena"])
-def get_mega_sena_numbers(mensagem):
+def mega_sena(mensagem):
     url = "https://loteriascaixa-api.herokuapp.com/api/mega-sena/latest"
     resposta = requests.get(url)
 
@@ -98,7 +111,7 @@ def get_mega_sena_numbers(mensagem):
         acumul = dados_sorteio['acumulou']
         valacumul = dados_sorteio['acumuladaProxConcurso']
         if acumul:
-            result = 'Acumulou!'
+            result = 'Está acumulado!'
             bot.send_message(mensagem.chat.id, f'{result}')
             bot.send_message(mensagem.chat.id, 'Dados:')
             bot.send_message(mensagem.chat.id, f"Concurso: {conc}, Números Sorteados: {num_sorteados}, Valor do próximo sorteio: {valacumul}")
@@ -125,9 +138,20 @@ texto = """
 """
 
 
+# Apresentação: 1° mensagem
+@bot.message_handler(func=verificar)
+def apresentacao(message):
+    user_name = message.from_user.first_name
+    time_of_day = get_time_of_day()
+    welcome_message = f"{time_of_day}, {user_name}! O que deseja?\n\nOpções disponíveis:\n{texto}"
+    bot.send_message(message.chat.id, welcome_message)
+
+
+# Mostra opções. 2° mensagem
 @bot.message_handler(func=verificar)
 def responder(mensagem):
     bot.reply_to(mensagem, texto)
 
 
-bot.polling()  # <- loop do bot
+# Inicie o bot
+bot.polling()
