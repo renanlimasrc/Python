@@ -26,7 +26,7 @@ def get_time_of_day():
 @bot.message_handler(commands=["cep"])
 def busca_cep(mensagem):
     bot.send_message(mensagem.chat.id, "Digite o CEP para obter informações sobre a rua:")
-    bot.register_next_step_handler(mensagem, busca_cep) # < - parâmetro que pega o conteúdo da próxima mensagem que é chamada na próxima função
+    bot.register_next_step_handler(mensagem, busca_cep) # < - parâmetro que pega o conteúdo da próxima mensagem
 
 
 def busca_cep(mensagem):
@@ -107,20 +107,28 @@ def mega_sena(mensagem):
         dados_sorteio = resposta.json()
         conc = dados_sorteio['concurso']
         num_sorteados = ", ".join(dados_sorteio['dezenas'])
-        vencedores = dados_sorteio['premiacoes'][0]['vencedores']
         acumul = dados_sorteio['acumulou']
-        valacumul = dados_sorteio['acumuladaProxConcurso']
+        
         if acumul:
             result = 'Está acumulado!'
+            valacumul = dados_sorteio['acumuladaProxConcurso']
             bot.send_message(mensagem.chat.id, f'{result}')
             bot.send_message(mensagem.chat.id, 'Dados:')
-            bot.send_message(mensagem.chat.id, f"Concurso: {conc}, Números Sorteados: {num_sorteados}, Valor do próximo sorteio: {valacumul}")
+            bot.send_message(mensagem.chat.id, f"Concurso: {conc}")
+            bot.send_message(mensagem.chat.id, f"Números Sorteados: {num_sorteados}"),
+            bot.send_message(mensagem.chat.id, f"Valor do próximo sorteio: {valacumul}")
         else:
             result = 'Saiu!'
+            vencedores = dados_sorteio['premiacoes'][0]['vencedores']
             premio = dados_sorteio['premiacoes'][0]['premio']
             bot.send_message(mensagem.chat.id, f'{result}')
             bot.send_message(mensagem.chat.id, 'Dados:')
-            bot.send_message(mensagem.chat.id, f"Concurso: {conc},Números Sorteados: {num_sorteados}, Número de vencedores:{vencedores}, Prêmio: {premio}, Valor do próximo sorteio: {valacumul}")
+            bot.send_message(mensagem.chat.id, f"Concurso: {conc}")
+            bot.send_message(mensagem.chat.id, f"Números Sorteados: {num_sorteados}")
+            bot.send_message(mensagem.chat.id, f"Números de vencedores: {vencedores}")
+            bot.send_message(mensagem.chat.id, f"Prêmio: {premio}")
+
+
     else:
         bot.send_message(mensagem.chat.id, "Não foi possível obter os números do último sorteio da Mega-Sena.")
 
