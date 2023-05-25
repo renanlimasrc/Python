@@ -3,9 +3,9 @@ import requests
 import datetime
 
 
-CHAVE_API_TELEGRAM = ""
-CHAVE_API_TEMPO = "" 
-# Vá no site openweather.com e gere seu token para ter acesso a API do tempo
+CHAVE_API_TELEGRAM = "" # Gere seu bot do telegram com o @botfather
+CHAVE_API_TEMPO = ""  # Vá no site openweather.com e gere seu token para ter acesso a API do tempo
+
 
 bot = telebot.TeleBot(CHAVE_API_TELEGRAM)
 
@@ -22,7 +22,7 @@ def get_time_of_day():
     else:
         return "Boa noite"
 
-
+# Executa o comando /cep
 @bot.message_handler(commands=["cep"])
 def busca_cep(mensagem):
     bot.send_message(mensagem.chat.id, "Digite o CEP para obter informações sobre a rua:")
@@ -51,7 +51,7 @@ def busca_cep(mensagem):
     else:
         bot.send_message(mensagem.chat.id , "Por favor, especifique o CEP.")
 
-
+# Executa o comando /seu_id
 @bot.message_handler(commands=["seu_id"])
 def iduser(mensagem):
     iduser = mensagem.chat.id
@@ -59,13 +59,14 @@ def iduser(mensagem):
 
 cidade_temp = {}
 
+# Executa o comando /temp
 @bot.message_handler(commands=["temp"])
 def handle_message(mensagem):
     chat_id = mensagem.chat.id
     bot.send_message(chat_id, "Digite o nome da cidade:")
     cidade_temp[chat_id] = True
 
-
+# Busca os dados meteorológicos da cidade
 @bot.message_handler(func=lambda mensagem: cidade_temp.get(mensagem.chat.id, False))
 def cidade_tempo(mensagem):
     cidade = mensagem.text
@@ -84,7 +85,7 @@ def cidade_tempo(mensagem):
 
     del cidade_temp[mensagem.chat.id]
 
-
+# Executa o comando cotação
 @bot.message_handler(commands=["cotacao"])
 def cotacao_dolar(mensagem):
     link = "https://economia.awesomeapi.com.br/last/USD-BRL"
@@ -97,7 +98,7 @@ def cotacao_dolar(mensagem):
     bitcoin = reqbit['BTCBRL']['bid']
     bot.reply_to(mensagem, f"Cotação Dólar: R${dolar}\nCotação Bitcoin: R${bitcoin}.00")
 
-
+# Executa o comando megasena
 @bot.message_handler(commands=["megasena"])
 def mega_sena(mensagem):
     url = "https://loteriascaixa-api.herokuapp.com/api/mega-sena/latest"
@@ -132,7 +133,7 @@ def mega_sena(mensagem):
     else:
         bot.send_message(mensagem.chat.id, "Não foi possível obter os números do último sorteio da Mega-Sena.")
 
-
+# True, necessário para iniciar o bot
 def verificar(mensagem):
     return True
 
