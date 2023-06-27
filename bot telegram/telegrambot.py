@@ -3,7 +3,7 @@ import requests
 import datetime
 
 
-CHAVE_API_TELEGRAM = "" # Gere seu bot do telegram com o @botfather
+CHAVE_API_TELEGRAM = ""  # Gere seu bot do telegram com o @botfather
 CHAVE_API_TEMPO = ""  # Vá no site openweather.com e gere seu token para ter acesso a API do tempo
 
 
@@ -22,14 +22,15 @@ def get_time_of_day():
     else:
         return "Boa noite"
 
+
 # Executa o comando /cep
 @bot.message_handler(commands=["cep"])
 def busca_cep(mensagem):
-    bot.send_message(mensagem.chat.id, "Digite o CEP para obter informações sobre a rua:")
-    bot.register_next_step_handler(mensagem, busca_cep) # < - parâmetro que pega o conteúdo da próxima mensagem
+    bot.send_message(mensagem.chat.id, "Digite o CEP para obter informações sobre o local(rua, avenida, etc):")
+    bot.register_next_step_handler(mensagem, busca_cep_exec)  # < - parâmetro que pega o conteúdo da próxima mensagem
 
 
-def busca_cep(mensagem):
+def busca_cep_exec(mensagem):
     cep = mensagem.text
     if cep:
         url = f"https://viacep.com.br/ws/{cep}/json/"
@@ -57,7 +58,9 @@ def iduser(mensagem):
     iduser = mensagem.chat.id
     bot.reply_to(mensagem, f"id: {iduser}")
 
+
 cidade_temp = {}
+
 
 # Executa o comando /temp
 @bot.message_handler(commands=["temp"])
@@ -66,6 +69,7 @@ def handle_message(mensagem):
     bot.send_message(chat_id, "Digite o nome da cidade:")
     cidade_temp[chat_id] = True
 
+
 # Busca os dados meteorológicos da cidade
 @bot.message_handler(func=lambda mensagem: cidade_temp.get(mensagem.chat.id, False))
 def cidade_tempo(mensagem):
@@ -73,7 +77,6 @@ def cidade_tempo(mensagem):
     if cidade:
         url = f"https://api.openweathermap.org/data/2.5/weather?q={cidade}&appid={CHAVE_API_TEMPO}&units=metric"
         resposta = requests.get(url)
-        
         if resposta.status_code == 200:
             dados_clima = resposta.json()
             temperatura = dados_clima["main"]["temp"]
@@ -84,6 +87,7 @@ def cidade_tempo(mensagem):
         bot.send_message(mensagem.chat.id, "Por favor, especifique o nome da cidade corretamente.")
 
     del cidade_temp[mensagem.chat.id]
+
 
 # Executa o comando cotação
 @bot.message_handler(commands=["cotacao"])
@@ -98,6 +102,7 @@ def cotacao_dolar(mensagem):
     bitcoin = reqbit['BTCBRL']['bid']
     bot.reply_to(mensagem, f"Cotação Dólar: R${dolar}\nCotação Bitcoin: R${bitcoin}.00")
 
+
 # Executa o comando megasena
 @bot.message_handler(commands=["megasena"])
 def mega_sena(mensagem):
@@ -109,12 +114,14 @@ def mega_sena(mensagem):
         conc = dados_sorteio['concurso']
         num_sorteados = ", ".join(dados_sorteio['dezenas'])
         acumul = dados_sorteio['acumulou']
+        data = dados_sorteio['data']
         
         if acumul:
             result = 'Está acumulado!'
             valacumul = dados_sorteio['acumuladaProxConcurso']
             bot.send_message(mensagem.chat.id, f'{result}')
             bot.send_message(mensagem.chat.id, 'Dados:')
+            bot.send_message(mensagem.chat.id, f"Data do sorteio: {data}")
             bot.send_message(mensagem.chat.id, f"Concurso: {conc}")
             bot.send_message(mensagem.chat.id, f"Números Sorteados: {num_sorteados}"),
             bot.send_message(mensagem.chat.id, f"Valor do próximo sorteio: {valacumul}")
@@ -124,14 +131,14 @@ def mega_sena(mensagem):
             premio = dados_sorteio['premiacoes'][0]['premio']
             bot.send_message(mensagem.chat.id, f'{result}')
             bot.send_message(mensagem.chat.id, 'Dados:')
+            bot.send_message(mensagem.chat.id, f"Data do sorteio: {data}")
             bot.send_message(mensagem.chat.id, f"Concurso: {conc}")
             bot.send_message(mensagem.chat.id, f"Números Sorteados: {num_sorteados}")
             bot.send_message(mensagem.chat.id, f"Números de vencedores: {vencedores}")
             bot.send_message(mensagem.chat.id, f"Prêmio: {premio}")
-
-
     else:
         bot.send_message(mensagem.chat.id, "Não foi possível obter os números do último sorteio da Mega-Sena.")
+
 
 # True, necessário para iniciar o bot
 def verificar(mensagem):
