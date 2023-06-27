@@ -2,6 +2,7 @@ import telebot
 import requests
 import datetime
 
+# By n1nr0d
 
 CHAVE_API_TELEGRAM = ""  # Gere seu bot do telegram com o @botfather
 CHAVE_API_TEMPO = ""  # Vá no site openweather.com e gere seu token para ter acesso a API do tempo
