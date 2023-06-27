@@ -1,4 +1,6 @@
-#!/usr/bin/python
+#!/usr/bin/env python
+
+# by n1nr0d
 
 
 # Script pessoal para a leitura de dados do meu disco nvme + btrfs(e suas opções de montagem)
