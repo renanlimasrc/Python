@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+# Arquivo de encriptar pasta
+# by n1nr0d
 
 import os
 from cryptography.fernet import Fernet
