@@ -1,10 +1,11 @@
 #!/usr/bin/python
 
+# By Renan Lima, versão 2.1
+
 import telebot
 import requests
 import datetime
 import locale
-
 
 
 CHAVE_API_TELEGRAM = ""  # Gere seu bot do telegram com o @botfather
@@ -99,18 +100,20 @@ def cotacao_dolar(mensagem):
     link2 = "https://economia.awesomeapi.com.br/last/BTC-BRL"
     reqdol = requests.get(link)
     reqdol = reqdol.json()
-    dolar = reqdol['USDBRL']['bid']
+    dolar = float(reqdol['USDBRL']['bid'])
+    dolar = locale.currency(dolar, grouping=True, symbol=True)
     reqbit = requests.get(link2)
     reqbit = reqbit.json()
-    bitcoin = reqbit['BTCBRL']['bid']
-    bot.reply_to(mensagem, f"Cotação Dólar: R${dolar}\nCotação Bitcoin: R${bitcoin}.00")
+    bitcoin = float(reqbit['BTCBRL']['bid'])
+    bitcoin = locale.currency(bitcoin, grouping=True, symbol=True)
+    bot.reply_to(mensagem, f"Cotação Dólar: {dolar}\nCotação Bitcoin: {bitcoin}")
 
 
 # Executa o comando megasena
 @bot.message_handler(commands=["megasena"])
 def mega_sena(mensagem):
 
-    conc_num = "latest" # Alterar de latest para algum número para consultador o concurso: Ex: 2600. Irá consultar o concurso 2600
+    conc_num = "latest" # Alterar de latest para algum número para consultador o concurso: Ex: 2510. Irá consultar o concurso 2510
 
     url = f"https://loteriascaixa-api.herokuapp.com/api/megasena/{conc_num}"
     resposta = requests.get(url)
@@ -135,7 +138,8 @@ def mega_sena(mensagem):
                 bot.send_message(mensagem.chat.id, 'Dados:')
                 bot.send_message(mensagem.chat.id, f"Data do sorteio: {data}")
                 bot.send_message(mensagem.chat.id, f"Concurso: {conc}")
-                bot.send_message(mensagem.chat.id, f"Números Sorteados: {num_sorteados}"),
+                bot.send_message(mensagem.chat.id, f"Números Sorteados: {num_sorteados}")
+                bot.send_message(mensagem.chat.id, f"Valor sorteado: {val_sort}")
                 bot.send_message(mensagem.chat.id, f"Valor do próximo sorteio: {val_acumul}")
                 bot.send_message(mensagem.chat.id, f"Data do próximo concurso: {prox_conc_data})")
 
