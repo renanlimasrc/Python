@@ -1,15 +1,19 @@
+#!/usr/bin/python
+
+# Por Renan Lima, versão 2
+
 import telebot
 import requests
 import datetime
+import locale
 
-# By n1nr0d
+
 
 CHAVE_API_TELEGRAM = ""  # Gere seu bot do telegram com o @botfather
 CHAVE_API_TEMPO = ""  # Vá no site openweather.com e gere seu token para ter acesso a API do tempo
 
-
 bot = telebot.TeleBot(CHAVE_API_TELEGRAM)
-
+locale.setlocale(locale.LC_ALL, 'pt_BR.utf8')
 
 # Verificar a hora do dia
 def get_time_of_day():
@@ -107,38 +111,65 @@ def cotacao_dolar(mensagem):
 # Executa o comando megasena
 @bot.message_handler(commands=["megasena"])
 def mega_sena(mensagem):
-    url = "https://loteriascaixa-api.herokuapp.com/api/mega-sena/latest"
-    resposta = requests.get(url)
 
+    conc_num = "latest" # Alterar de latest para algum número para consultador o concurso: Ex: 2600. Irá consultar o concurso 2600
+
+    url = f"https://loteriascaixa-api.herokuapp.com/api/megasena/{conc_num}"
+    resposta = requests.get(url)
     if resposta.status_code == 200:
-        dados_sorteio = resposta.json()
-        conc = dados_sorteio['concurso']
-        num_sorteados = ", ".join(dados_sorteio['dezenas'])
-        acumul = dados_sorteio['acumulou']
-        data = dados_sorteio['data']
-        
-        if acumul:
-            result = 'Está acumulado!'
-            valacumul = dados_sorteio['acumuladaProxConcurso']
-            bot.send_message(mensagem.chat.id, f'{result}')
-            bot.send_message(mensagem.chat.id, 'Dados:')
-            bot.send_message(mensagem.chat.id, f"Data do sorteio: {data}")
-            bot.send_message(mensagem.chat.id, f"Concurso: {conc}")
-            bot.send_message(mensagem.chat.id, f"Números Sorteados: {num_sorteados}"),
-            bot.send_message(mensagem.chat.id, f"Valor do próximo sorteio: {valacumul}")
-        else:
-            result = 'Saiu!'
-            vencedores = dados_sorteio['premiacoes'][0]['vencedores']
-            premio = dados_sorteio['premiacoes'][0]['premio']
-            bot.send_message(mensagem.chat.id, f'{result}')
-            bot.send_message(mensagem.chat.id, 'Dados:')
-            bot.send_message(mensagem.chat.id, f"Data do sorteio: {data}")
-            bot.send_message(mensagem.chat.id, f"Concurso: {conc}")
-            bot.send_message(mensagem.chat.id, f"Números Sorteados: {num_sorteados}")
-            bot.send_message(mensagem.chat.id, f"Números de vencedores: {vencedores}")
-            bot.send_message(mensagem.chat.id, f"Prêmio: {premio}")
+            dados_sorteio = resposta.json()
+            #print(dados_sorteio)
+            data = dados_sorteio["data"]
+            conc = dados_sorteio["concurso"]
+            num_sorteados = ", ".join(dados_sorteio["dezenas"])
+            val_sort = dados_sorteio["premiacoes"][0]["valorPremio"] # <- Premio caso saia!
+            acumul = dados_sorteio['acumulou']
+            ganhadores = dados_sorteio["premiacoes"][0]["ganhadores"]
+            prox_conc_data = dados_sorteio["dataProximoConcurso"]
+            prox_conc_val = dados_sorteio["valorEstimadoProximoConcurso"]
+            prox_conc_val = locale.currency(prox_conc_val, grouping=True, symbol=True)
+          
+            if acumul is True:
+                result = "Está acumulado!"
+                val_acumul = dados_sorteio["valorAcumuladoProximoConcurso"]
+                val_acumul = locale.currency(val_acumul, grouping=True, symbol=True)
+                bot.send_message(mensagem.chat.id, f'{result}')
+                bot.send_message(mensagem.chat.id, 'Dados:')
+                bot.send_message(mensagem.chat.id, f"Data do sorteio: {data}")
+                bot.send_message(mensagem.chat.id, f"Concurso: {conc}")
+                bot.send_message(mensagem.chat.id, f"Números Sorteados: {num_sorteados}"),
+                bot.send_message(mensagem.chat.id, f"Valor do próximo sorteio: {val_acumul}")
+                bot.send_message(mensagem.chat.id, f"Data do próximo concurso: {prox_conc_data})")
+
+            elif acumul is False:
+                result = "Saiu!"
+                premio = dados_sorteio["premiacoes"][0]["valorPremio"]
+                premio = locale.currency(premio, grouping=True, symbol=True)
+                resultados = []
+                local_ganhadores = dados_sorteio["localGanhadores"]
+
+                for item in local_ganhadores:
+                    ganhadores = item["ganhadores"]
+                    municipio = item["municipio"]
+                    uf = item["uf"]
+
+                if uf =="--" and municipio == "CANAL ELETRONICO": 
+                  resultados.append([f"Número de ganhadores: {ganhadores}, Aposta feita pela internet"])
+                else:
+                  resultados.append([f"Número de ganhadores: {ganhadores}, Município: {municipio}, Estado: {uf}"])
+                string_resultados = "\n".join([", ".join(lista) for lista in resultados])
+                bot.send_message(mensagem.chat.id, f'{result}')
+                bot.send_message(mensagem.chat.id, 'Dados:')
+                bot.send_message(mensagem.chat.id, f"Data do sorteio: {data}")
+                bot.send_message(mensagem.chat.id, f"Concurso: {conc}")
+                bot.send_message(mensagem.chat.id, f"Números Sorteados: {num_sorteados}")
+                bot.send_message(mensagem.chat.id, f"Prêmio: {premio}")
+                bot.send_message(mensagem.chat.id, f"Vencedores: {string_resultados}")
+                bot.send_message(mensagem.chat.id, f"Data do próximo concurso: {prox_conc_data}")
+                bot.send_message(mensagem.chat.id, f"Valor estimado do próximo concurso: {prox_conc_val}")
+                
     else:
-        bot.send_message(mensagem.chat.id, "Não foi possível obter os números do último sorteio da Mega-Sena.")
+        print("Não foi possível obter os números da Mega-Sena!")    
 
 
 # True, necessário para iniciar o bot
