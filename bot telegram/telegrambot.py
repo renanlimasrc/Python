@@ -1,7 +1,5 @@
 #!/usr/bin/python
 
-# Por Renan Lima, versão 2
-
 import telebot
 import requests
 import datetime
@@ -153,7 +151,7 @@ def mega_sena(mensagem):
                     municipio = item["municipio"]
                     uf = item["uf"]
 
-                if uf =="--" and municipio == "CANAL ELETRONICO": 
+                if municipio == "CANAL ELETRONICO" and uf =="--": 
                   resultados.append([f"Número de ganhadores: {ganhadores}, Aposta feita pela internet"])
                 else:
                   resultados.append([f"Número de ganhadores: {ganhadores}, Município: {municipio}, Estado: {uf}"])
