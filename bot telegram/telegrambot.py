@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-# By Renan Lima, versão 2.1
+# By Renan Lima, versão 2.3
 
 import telebot
 import requests
@@ -155,10 +155,11 @@ def mega_sena(mensagem):
                     municipio = item["municipio"]
                     uf = item["uf"]
 
-                if municipio == "CANAL ELETRONICO" and uf =="--": 
+                if municipio == "CANAL ELETRONICO" and uf == "--": 
                   resultados.append([f"Número de ganhadores: {ganhadores}, Aposta feita pela internet"])
                 else:
                   resultados.append([f"Número de ganhadores: {ganhadores}, Município: {municipio}, Estado: {uf}"])
+
                 string_resultados = "\n".join([", ".join(lista) for lista in resultados])
                 bot.send_message(mensagem.chat.id, f'{result}')
                 bot.send_message(mensagem.chat.id, 'Dados:')
