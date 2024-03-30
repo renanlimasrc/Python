@@ -7,7 +7,7 @@ from cryptography.fernet import Fernet
 import tkinter as tk
 import time
 
-
+# Endereço que será escrito para mandar recursos...
 endereco = "teste 123"
 
 # Gravar a senha no arquivo
