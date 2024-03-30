@@ -5,7 +5,6 @@
 import os
 from cryptography.fernet import Fernet
 import tkinter as tk
-import time
 
 # Descriptografar os arquivos de um diretório
 def descriptografar_arquivos(diretorio, chave):
