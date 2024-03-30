@@ -4,19 +4,11 @@
 
 import os
 from cryptography.fernet import Fernet
-import string
-import random
 import tkinter as tk
 import time
 
-# Endereço que será pedido para ser depositado a moeda/valor
-endereco = "teste 123"
 
-# Gerar uma senha aleatória com números, letras e caracteres especiais
-def gerar_senha():
-    caracteres = string.ascii_letters + string.digits + string.punctuation
-    senha = ''.join(random.choice(caracteres) for _ in range(32))
-    return senha
+endereco = "teste 123"
 
 # Gravar a senha no arquivo
 def gravar_senha(senha):
