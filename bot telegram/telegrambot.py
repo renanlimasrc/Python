@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-# By Renan Lima, versão 2.3
+# By Renan Lima, versão 2.4
 
 import telebot
 import requests
@@ -127,19 +127,15 @@ def mega_sena(mensagem):
             prox_conc_data = dados_sorteio["dataProximoConcurso"]
             prox_conc_val = dados_sorteio["valorEstimadoProximoConcurso"]
             prox_conc_val = locale.currency(prox_conc_val, grouping=True, symbol=True)
-          
+
             if acumul is True:
                 result = "Ninguém acertou os 6 números!"
                 val_acumul = dados_sorteio["valorAcumuladoProximoConcurso"]
                 val_acumul = locale.currency(val_acumul, grouping=True, symbol=True)
-                bot.send_message(mensagem.chat.id, f'{result}')
-                bot.send_message(mensagem.chat.id, 'Dados:')
-                bot.send_message(mensagem.chat.id, f"Data do sorteio: {data}")
-                bot.send_message(mensagem.chat.id, f"Concurso: {conc}")
-                bot.send_message(mensagem.chat.id, f"Números Sorteados: {num_sorteados}")
-                bot.send_message(mensagem.chat.id, f"Valor sorteado: {val_acumul}")
-                bot.send_message(mensagem.chat.id, f"Valor estimado do próximo concurso: {prox_conc_val}")
-                bot.send_message(mensagem.chat.id, f"Data do próximo concurso: {prox_conc_data}")
+                # result, data, conc, num_sorteados, val_acumul
+                atualizacao = f"{result}\nData do sorteio: {data}\nConcurso: {conc}\nNúmeros sorteados: {num_sorteados}\nValor sorteado: {val_acumul}\nValor estimado no próximo concurso: {prox_conc_val}\nData do próximo concurso: {prox_conc_data}"
+                bot.reply_to(mensagem, atualizacao)
+            
 
             elif acumul is False:
                 result = "Saiu!"
@@ -161,17 +157,8 @@ def mega_sena(mensagem):
 
                 string_resultados = "\n".join([", ".join(lista) for lista in resultados])
 
-
-                bot.send_message(mensagem.chat.id, f'{result}')
-                bot.send_message(mensagem.chat.id, 'Dados:')
-                bot.send_message(mensagem.chat.id, f"Data do sorteio: {data}")
-                bot.send_message(mensagem.chat.id, f"Concurso: {conc}")
-                bot.send_message(mensagem.chat.id, f"Números Sorteados: {num_sorteados}")
-                bot.send_message(mensagem.chat.id, f"Prêmio: {premio}")
-                bot.send_message(mensagem.chat.id, f"Número de pessoas que acertaram a sena: {ganhadores_qtd}")
-                bot.send_message(mensagem.chat.id, f"Ganhadores:\n{string_resultados}")
-                bot.send_message(mensagem.chat.id, f"Data do próximo concurso: {prox_conc_data}")
-                bot.send_message(mensagem.chat.id, f"Valor estimado do próximo concurso: {prox_conc_val}")
+                atualizacao = f"{result}\nData do sorteio: {data}\nConcurso: {conc}\nNúmeros Sorteados: {num_sorteados}\nValor sorteado: {premio}\nNúmero de pessoas que acertaram a sena: {ganhadores_qtd}\nGanhadores:\n{string_resultados}\nData do próximo concurso: {prox_conc_data}\nValor estimado do próximo concurso: {prox_conc_val}"
+                bot.reply_to(mensagem, atualizacao)
                 
     else:
         print("Não foi possível obter os números da Mega-Sena!")    
