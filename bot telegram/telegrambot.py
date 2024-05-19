@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-# By Renan Lima, versão 2.4
+# By Renan Lima, versão 2.5
 
 import telebot
 import requests
@@ -96,17 +96,26 @@ def cidade_tempo(mensagem):
 # Executa o comando cotação
 @bot.message_handler(commands=["cotacao"])
 def cotacao_dolar(mensagem):
-    link = "https://economia.awesomeapi.com.br/last/USD-BRL"
-    link2 = "https://economia.awesomeapi.com.br/last/BTC-BRL"
-    reqdol = requests.get(link)
-    reqdol = reqdol.json()
-    dolar = float(reqdol['USDBRL']['bid'])
-    dolar = locale.currency(dolar, grouping=True, symbol=True)
-    reqbit = requests.get(link2)
-    reqbit = reqbit.json()
-    bitcoin = float(reqbit['BTCBRL']['bid'])
-    bitcoin = locale.currency(bitcoin, grouping=True, symbol=True)
-    bot.reply_to(mensagem, f"Cotação Dólar: {dolar}\nCotação Bitcoin: {bitcoin}")
+    link_dolar = "https://economia.awesomeapi.com.br/last/USD-BRL"
+    link_btc = "https://economia.awesomeapi.com.br/last/BTC-BRL"
+    reqdol = requests.get(link_dolar)
+    
+    if reqdol.status_code == 200:
+        reqdol = reqdol.json()
+        dolar = float(reqdol['USDBRL']['bid'])
+        dolar = locale.currency(dolar, grouping=True, symbol=True)
+    else:
+        raise reqdol.raise_for_status()
+    
+    reqbit = requests.get(link_btc)
+    if reqbit.status_code == 200:
+        reqbit = reqbit.json()
+        bitcoin = float(reqbit['BTCBRL']['bid'])
+        bitcoin = locale.currency(bitcoin, grouping=True, symbol=True)
+        bot.reply_to(mensagem, f"Cotação Dólar: {dolar}\nCotação Bitcoin: {bitcoin}")
+    else :
+        raise reqbit.raise_for_status()
+    
 
 
 # Executa o comando megasena
